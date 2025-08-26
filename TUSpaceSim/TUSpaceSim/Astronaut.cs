@@ -21,7 +21,12 @@ namespace TUSpaceSim
 
         public Astronaut(string astronautId, string name, DateTime birthday, string nationality, string agency, double weight)
         {
-            
+            this.astronautId = astronautId;
+            this.name = name;
+            this.birthday = birthday;
+            this.nationality = nationality;
+            this.agency = agency;
+            this.weight = weight;
         }
 
         #region Getters & Setters
@@ -34,12 +39,13 @@ namespace TUSpaceSim
 
         public void PrintInformation()
         {
-            throw new NotImplementedException();
+            Console.WriteLine($"| {astronautId,-12} | {name,-25} | {birthday:dd:MM:yyyy} | {nationality} | {agency,-10} | {weight:F1} kg | {numberOfMissions,8} | {totalTimeInSpace,8} days |");
         }
 
         public void UpdateNumberOfMissionsAndTotalTimeInSpace(int days)
         {
-            throw new NotImplementedException();
+            numberOfMissions++;
+            totalTimeInSpace += days;
         }
     }
 }

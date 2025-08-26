@@ -43,8 +43,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Astronaut.cs" />
+    <Compile Include="Enums.cs" />
+    <Compile Include="Mission.cs" />
+    <Compile Include="MissionControl.cs" />
+    <Compile Include="MissionDestination.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Spacecraft.cs" />
+    <Compile Include="Spacestation.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
