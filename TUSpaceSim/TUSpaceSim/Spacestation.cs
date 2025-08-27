@@ -16,6 +16,13 @@ namespace TUSpaceSim
         private double payloadCapacity;
         private double storedPayload;
 
+        public Spacestation(string name, int orbitAltitude, double payloadCapacity, int crewCapacity, int numberOfDockingPorts, double transferDeltaV, double deorbitDeltaV) : base(name, orbitAltitude, transferDeltaV, deorbitDeltaV)
+        {
+            this.payloadCapacity = payloadCapacity;
+            this.crewCapacity = crewCapacity;
+            this.numberOfDockingPorts = numberOfDockingPorts;
+        }
+
         #region Getters
 
         public List<Astronaut> GetCurrentCrew() => currentCrew;
@@ -25,46 +32,49 @@ namespace TUSpaceSim
         public List<Spacecraft> GetDockedSpacecraft() => dockedSpacecraft;
         public int GetNumberOfDockingPorts() => numberOfDockingPorts;
 
-        public Spacestation(string name, int orbitAltitude, double payloadCapacity, int crewCapacity, int numberOfDockingPorts, double transferDeltaV, double deorbitDeltaV)
-        {
-
-        }
-
         #endregion
 
         public void AddCrew(List<Astronaut> crew)
         {
-            throw new NotImplementedException();
+            foreach (var astronaut in crew) 
+                Console.WriteLine($"[INFO]   {astronaut.GetName()} boarded spacestation {name}");
+            currentCrew.AddRange(crew);
         }
 
         public void AddPayload(double mass)
         {
-            throw new NotImplementedException();
+            storedPayload += mass;
+            Console.WriteLine($"[INFO]   {mass} kg of cargo transferred to spacestation {name}");
         }
 
-        public int CalculateNumberOfOrbits()
-        {
-            throw new NotImplementedException();
-        }
+        public override int CalculateNumberOfOrbits() => 
+            new Random().Next(2, 5);
 
         public void DockSpacecraft(Spacecraft spacecraft)
         {
-            throw new NotImplementedException();
+            dockedSpacecraft.Add(spacecraft);
+            Console.WriteLine($"[DOCKED]   Spacecraft {spacecraft.GetSpacecraftType()} ({spacecraft.GetSpacecraftId()}) is now attached to spacestation {name}.");
         }
 
         public void RemoveCrew(List<Astronaut> crew)
         {
-            throw new NotImplementedException();
+            foreach (var astronaut in crew) 
+            {
+                Console.WriteLine($"[INFO]   {astronaut.GetName()} left spacestation {name}.");
+                currentCrew.Remove(astronaut);
+            }
         }
 
         public void RemovePayload(double mass)
         {
-            throw new NotImplementedException();
+            storedPayload -= mass;
+            Console.WriteLine($"[INFO]   {mass} kg of cargo from spacestation {name} returned to earth.");
         }
 
         public void UndockSpacecraft(Spacecraft spacecraft)
         {
-            throw new NotImplementedException();
+            dockedSpacecraft.Remove(spacecraft);
+            Console.WriteLine($"[UNDOCKED]   Spacecraft {spacecraft.GetSpacecraftType()} ({spacecraft.GetSpacecraftId()}) left spacestation {name}.");
         }
 
 
