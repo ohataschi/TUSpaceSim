@@ -165,7 +165,85 @@ namespace TUSpaceSim
 
         public bool StartNextMission()
         {
-            throw new NotImplementedException();
+            plannedMissions.Sort();
+            var nextMission = plannedMissions.First();
+            UpdateCurrentMissions(nextMission.GetLaunchDate());
+
+            //Konsolenausgabe
+
+            var spacecraftForNextMission = GetAvailableSpacecraftForMission(nextMission);
+            if (spacecraftForNextMission == null)
+            {
+                //Konsolenausgabe: Cancelled
+                nextMission.SetMissionStatus(MissionStatus.Cancelled);
+                plannedMissions.Remove(nextMission);
+                return false;
+            }
+
+            //Konsolenausgabe: Assigned
+            spacecraftForNextMission.AddPayload(nextMission.GetPayload());
+            var flightTimeInMinutes = nextMission.GetDestination().CalculateFlightTime(spacecraftForNextMission);
+            var arrivalTime = nextMission.GetLaunchDate().AddMinutes(flightTimeInMinutes);
+
+            //Konsolenausgabe: Flighttime
+
+            var dest = nextMission.GetDestination();
+            var fuelConsumptionTransfer = spacecraftForNextMission.CalculateFuelConsumption(dest.GetTransferDeltaV());
+            var fuelConsumptionDeorbit = spacecraftForNextMission.CalculateFuelConsumption(dest.GetDeorbitDeltaV());
+            var remainingFuel = 100 - fuelConsumptionTransfer - fuelConsumptionDeorbit;
+
+            //Konsolenausgabe Fuel
+
+            if (remainingFuel < 10) 
+            {
+                //Konsolenausgabe: Cancelled
+                nextMission.SetMissionStatus(MissionStatus.Cancelled);
+                plannedMissions.Remove(nextMission);
+                return false;
+            }
+
+            //Konsolenausgabe ready
+
+            if (dest is Spacestation station) 
+            {
+                if (!CheckSpacestationCapacity(nextMission, spacecraftForNextMission))
+                {
+                    nextMission.SetMissionStatus(MissionStatus.Cancelled);
+                    plannedMissions.Remove(nextMission);
+                    return false;
+                }
+                //Konsolenausgabe
+            }
+
+            nextMission.SetAssignedSpacecraft(spacecraftForNextMission);
+
+            if (nextMission.IsManned()) 
+            {
+                spacecraftForNextMission.AddCrew(registeredAstronauts);
+                //Konsolenausgabe
+            }
+
+            //Konsolenausgabe Clearance
+
+            spacecraftForNextMission.SetSpacecraftStatus(SpacecraftStatus.InOrbit);
+            nextMission.SetMissionStatus(MissionStatus.Ongoing);
+            currentMissions.Add(nextMission);
+            plannedMissions.Remove(nextMission);
+
+            if (dest is Spacestation spacestation) 
+            {
+                spacestation.DockSpacecraft(spacecraftForNextMission);
+                spacestation.AddPayload(spacecraftForNextMission.GetCurrentPayload());
+                spacecraftForNextMission.RemovePayload();
+                
+                if(nextMission.IsManned()) 
+                {
+                    spacestation.AddCrew(nextMission.GetAssignedCrew());
+                    spacecraftForNextMission.RemoveCrew();
+                } 
+            }
+
+            return true;
         }
 
         public void UpdateCurrentMissions(DateTime now) 
@@ -175,7 +253,65 @@ namespace TUSpaceSim
 
         public void UserInteraction()
         {
-            throw new NotImplementedException();
+            int input;
+            do
+            {
+                Console.WriteLine("MISSION CONTROL DASHBOARD");
+                Console.WriteLine("-------------------------------------");
+                Console.WriteLine($"Current active missions: {currentMissions.Count}");
+                Console.WriteLine("-------------------------------------");
+                Console.WriteLine("[1] Start next mission");
+                Console.WriteLine("[2] Show planned missions");
+                Console.WriteLine("[3] Show current missions");
+                Console.WriteLine("[4] Show completed missions");
+                Console.WriteLine("[5] Show all missions");
+                Console.WriteLine("[6] Show registered astronauts");
+                Console.WriteLine("[7] Show registered spacecraft");
+                Console.WriteLine("[8] Show status of ISS");
+                Console.WriteLine("[0] Exit program");
+                Console.WriteLine("-------------------------------------");
+                Console.WriteLine("Selection:");
+
+                input = int.Parse(Console.ReadLine());
+                switch (input) 
+                {
+                    case 0: 
+                        {
+                            Console.WriteLine("Simulation stopped.");
+                        } break;
+                    case 1: 
+                        {
+                            if (plannedMissions.Count > 0)
+                                StartNextMission();
+                            else
+                                Console.WriteLine("No planned missions available.");
+                        } break;
+                    case 2: {
+                            PrintMissions(plannedMissions);
+                        } break;
+                    case 3: { 
+                            PrintMissions(currentMissions);
+                        } break;
+                    case 4: { 
+                            PrintMissions(completedMissions);
+                        } break;
+                    case 5: { 
+                            PrintMissions(allMissions);
+                        } break;
+                    case 6: { 
+                            PrintAstronauts(registeredAstronauts);
+                        } break;
+                    case 7: { 
+                            PrintSpacecrafts(registeredSpacecrafts);
+                        } break;
+                    case 8: {
+                            PrintSpacestationStatus(registeredDestinations.First() as Spacestation);
+                        } break;
+                    default: {
+                            Console.WriteLine("Invalid input");
+                        } break;
+                }
+            } while (input != 0);
         }
     }
 }

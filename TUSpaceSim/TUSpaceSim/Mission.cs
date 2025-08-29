@@ -55,7 +55,7 @@ namespace TUSpaceSim
         public DateTime GetPlannedUndockingOrDeorbit() => plannedUndockingOrDeorbit;
         public string GetResponsibleAgency() => responsibleAgency;
 
-        public void SetAssignedSpacecraft(SpacecraftStatus s) => assignedSpacecraft = s;
+        public void SetAssignedSpacecraft(Spacecraft s) => assignedSpacecraft = s;
         public void SetMissionStatus(MissionStatus s) => status = s;
 
         #endregion
