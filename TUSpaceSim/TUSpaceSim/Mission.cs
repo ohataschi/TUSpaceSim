@@ -25,7 +25,18 @@ namespace TUSpaceSim
 
         public Mission(string missionId, string missionName, string responsibleAgency, DateTime launchDate, int plannedDuration, string launchSite, MissionDestination destination, double payload, bool isManned, List<Astronaut> assignedCrew)
         {
-
+            this.missionId = missionId;
+            this.missionName = missionName;
+            this.responsibleAgency = responsibleAgency;
+            this.launchDate = launchDate;
+            this.plannedDuration = plannedDuration;
+            this.launchSite = launchSite;
+            this.destination = destination;
+            this.payload = payload;
+            this.isManned = isManned;
+            this.assignedCrew = assignedCrew;
+            crewSize = assignedCrew.Count;
+            plannedUndockingOrDeorbit = launchDate.AddDays(plannedDuration);
         }
 
         #region Getters & Setters
@@ -49,14 +60,12 @@ namespace TUSpaceSim
 
         #endregion
 
-        public int CompareTo(Mission other)
-        {
-            throw new NotImplementedException();
-        }
+        public int CompareTo(Mission other) => 
+            launchDate.CompareTo(other.launchDate);
 
         public void PrintInformation() 
         {
-            throw new NotImplementedException();
+            Console.WriteLine($"| {missionId,-12} | {missionName,-15} | {responsibleAgency,-15} | {destination.GetName(),-12} | {launchDate:dd:MM:yyyy} | {plannedDuration} days | {plannedUndockingOrDeorbit:dd:MM:yyyy} | {payload} kg | {string.Join(", ",assignedCrew.Select(q => q.GetAstronautId()))} | {status} |");
         }
     }
 }
