@@ -9,10 +9,10 @@ namespace TUSpaceSim
     #region Enums
     public enum SpacecraftStatus
     {
-        Operational,
+        OnGround,
         InOrbit,
         Docked,
-        Damaged,
+        Stranded,
         Retired
     }
 
@@ -21,6 +21,7 @@ namespace TUSpaceSim
         Planned,
         Ongoing,
         Completed,
+        Failed,
         Cancelled
     }
     #endregion

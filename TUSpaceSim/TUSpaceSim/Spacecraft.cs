@@ -48,11 +48,12 @@ namespace TUSpaceSim
         #region Getters & Setters
 
         public string GetAgency() => agency;
-        public int CrewCapacity() => crewCapacity;
+        public int GetCrewCapacity() => crewCapacity;
         public double GetCurrentPayload() => currentPayload;
         public bool IsManned() => isManned;
         public double GetPayloadCapacity() => payloadCapacity;
         public string GetSpacecraftId() => spacecraftId;
+        public SpacecraftStatus GetSpacecraftStatus() => status;
         public string GetSpacecraftType() => spacecraftType;
         public double GetTimeToParkingOrbit() => timeToParkingOrbit;
 
@@ -66,8 +67,8 @@ namespace TUSpaceSim
         }
 
         public void AddPayload(double p)
-        { 
-            throw new NotImplementedException(); 
+        {
+            currentPayload = p;
         }
 
         public double CalculateFuelConsumption(double deltaV) 

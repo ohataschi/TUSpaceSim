@@ -21,23 +21,56 @@ namespace TUSpaceSim
         public MissionControl(List<MissionDestination> registeredDestinations)
         {
             this.registeredDestinations = registeredDestinations;
+            completedMissions = new List<Mission>();
+            currentMissions = new List<Mission>();
         }
 
         public List<Astronaut> AssignCrewToMission(string crewIds, List<Astronaut> registeredAstronauts)
         {
             //Param crewIds Plural als string???
-            var crew = registeredAstronauts.Where(q => crewIds.Contains(q.GetName())).ToList();
+            var crew = registeredAstronauts.Where(q => crewIds.Contains(q.GetAstronautId())).ToList();
             return crew.Count > 0 ? crew : null;
         }
 
+        //Methode gehört nicht in diese Klasse
         private bool CheckSpacestationCapacity(Mission mission, Spacecraft spacecraft)
         {
-            throw new NotImplementedException();
+            var destination = mission.GetDestination();
+            if (destination is Spacestation spacestation) 
+            { 
+                if (spacestation.GetDockedSpacecraft().Count == spacestation.GetNumberOfDockingPorts()) 
+                {
+                    //Konsolenausgabe
+                    return false;
+                }
+                if (/*!spacecraft.IsManned() ^ */spacestation.GetCurrentCrew().Count + mission.GetCrewSize() > spacestation.GetCrewCapacity()) 
+                {
+                    //Konsolenausgabe
+                    return false;
+                }
+                if (spacestation.GetStoredPayload() + spacecraft.GetCurrentPayload() > spacestation.GetPayloadCapacity()) 
+                {
+                    //Konsolenausgabe
+                    return false;
+                }
+                if (spacestation.GetDockedSpacecraft().Sum(q => q.GetCrewCapacity()) + spacecraft.GetCrewCapacity() < spacestation.GetCurrentCrew().Count + mission.GetCrewSize()) 
+                {
+                    //Konsolenausgabe
+                    return false;
+                }
+                return true;
+            }
+            return false;
         }
 
         private Spacecraft GetAvailableSpacecraftForMission(Mission mission)
         {
-            throw new NotImplementedException(); 
+            return registeredSpacecrafts.FirstOrDefault(q =>
+                q.GetSpacecraftStatus() == SpacecraftStatus.OnGround
+                && q.GetAgency() == mission.GetResponsibleAgency()
+                && q.IsManned() == mission.IsManned()
+                && q.GetPayloadCapacity() >= mission.GetPayload()
+                && (!mission.IsManned() ^ q.GetCrewCapacity() >= mission.GetCrewSize()));
         }
 
         public List<Astronaut> LoadAstronautsFromCSV(string path)
@@ -101,7 +134,7 @@ namespace TUSpaceSim
                 var payload = double.Parse(fields[7]);
                 var isManned = bool.Parse(fields[8]);
 
-                List<Astronaut> assignedCrew = null;
+                var assignedCrew = new List<Astronaut>();
                 if (isManned)
                 {
                     assignedCrew = AssignCrewToMission(fields[9], registeredAstronauts);
@@ -248,7 +281,38 @@ namespace TUSpaceSim
 
         public void UpdateCurrentMissions(DateTime now) 
         {
-            throw new NotImplementedException(); 
+            var missionsToComplete = new List<Mission>();
+            foreach (var mission in currentMissions) 
+            {
+                if (mission.GetPlannedUndockingOrDeorbit() <= now)
+                    missionsToComplete.Add(mission);
+            }
+
+            if (missionsToComplete.Count == 0)
+                return;
+
+            //Konsolenausgabe
+
+            missionsToComplete.Sort();
+
+            foreach(var mission in missionsToComplete) 
+            { 
+                if (mission.GetDestination() is Spacestation spacestation) 
+                { 
+                    if (mission.IsManned()) 
+                        spacestation.RemoveCrew(mission.GetAssignedCrew());
+                    spacestation.RemovePayload(mission.GetPayload() * 0.3);
+                    //Konsolenausgabe
+                }
+                mission.SetMissionStatus(MissionStatus.Completed);
+                var spacecraft = mission.GetAssignedSpacecraft();
+                spacecraft.SetSpacecraftStatus(SpacecraftStatus.OnGround);
+                spacecraft.UpdateSpacecraftUsage();
+
+                mission.GetAssignedCrew().ForEach(q => q.UpdateNumberOfMissionsAndTotalTimeInSpace(mission.GetPlannedDuration()));
+                completedMissions.Add(mission);
+                currentMissions.Remove(mission);
+            }
         }
 
         public void UserInteraction()
